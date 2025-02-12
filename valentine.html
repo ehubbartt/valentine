@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .custom-cursor {
+      width: 15px;
+      height: 15px;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-heart {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #ff4b6e;
+      transform: rotate(-45deg);
+      animation: pulse 1s infinite;
+    }
+
+    .cursor-heart:before,
+    .cursor-heart:after {
+      content: '';
+      width: 100%;
+      height: 100%;
+      background: #ff4b6e;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .cursor-heart:before {
+      top: -50%;
+      left: 0;
+    }
+
+    .cursor-heart:after {
+      top: 0;
+      left: 50%;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .fall-transition {
+      transform: translateY(200vh) rotate(20deg);
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      color: #ff4b6e;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .success-message {
+      position: fixed;
+      top: -100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 4rem;
+      color: #ff4b6e;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transition: top 1s ease-out, opacity 1s ease-out;
+    }
+
+    .success-message.show {
+      top: 40%;
+      opacity: 1;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 2rem;
+      position: relative;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      font-size: 1.5rem;
+      border: none;
+      border-radius: 50px;
+      cursor: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .yes-btn {
+      background-color: #ff4b6e;
+      color: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .yes-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 75, 110, 0.5);
+    }
+
+    .no-btn {
+      background-color: #ff8da1;
+      color: white;
+    }
+
+    .petal {
+      position: fixed;
+      pointer-events: none;
+      width: 15px;
+      height: 15px;
+      background: #ff1744;
+      border-radius: 150% 0 150% 0;
+      animation: fall 3s linear forwards;
+      opacity: 0.8;
+      box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .heart-particle {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      transform: rotate(-45deg);
+      background: #ff4b6e;
+      z-index: 1000;
+    }
+
+    .heart-particle::before,
+    .heart-particle::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .heart-particle::before {
+      top: -50%;
+      left: 0;
+    }
+
+    .heart-particle::after {
+      top: 0;
+      left: 50%;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: rotate(-45deg) scale(1);
+      }
+
+      50% {
+        transform: rotate(-45deg) scale(1.1);
+      }
+
+      100% {
+        transform: rotate(-45deg) scale(1);
+      }
+    }
+
+    @keyframes fall {
+      to {
+        transform: translate(100px, 100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes heartBurst {
+      0% {
+        transform: translate(0, 0) rotate(-45deg) scale(0);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--tx), var(--ty)) rotate(-45deg) scale(1);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="custom-cursor">
+    <div class="cursor-heart"></div>
+  </div>
+  <div class="content">
+    <h1>Will you be my Valentine? 💝</h1>
+    <div class="buttons">
+      <button class="btn yes-btn">Yes!</button>
+      <button class="btn no-btn">No</button>
+    </div>
+  </div>
+  <div class="success-message">
+    Happy Valentines Day Lucy<br>I Love You So Much! ❤️
+  </div>
+
+  <script>
+    const cursor = document.querySelector('.custom-cursor');
+    const noBtn = document.querySelector('.no-btn');
+    const yesBtn = document.querySelector('.yes-btn');
+    const content = document.querySelector('.content');
+    const successMessage = document.querySelector('.success-message');
+    let isAnimating = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      if (!isAnimating) {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      }
+    });
+
+    function bezierPoint (t, p0, p1, p2, p3) {
+      const u = 1 - t;
+      const tt = t * t;
+      const uu = u * u;
+      const uuu = uu * u;
+      const ttt = tt * t;
+
+      return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3;
+    }
+
+    function moveToYesButton (startX, startY) {
+      isAnimating = true;
+      const yesBtnRect = yesBtn.getBoundingClientRect();
+      const endX = yesBtnRect.left + yesBtnRect.width / 2;
+      const endY = yesBtnRect.top + yesBtnRect.height / 2;
+
+      const controlX1 = startX + (Math.random() - 0.5) * 200;
+      const controlY1 = startY - Math.random() * 200;
+      const controlX2 = endX + (Math.random() - 0.5) * 200;
+      const controlY2 = endY - Math.random() * 200;
+
+      let start = null;
+      const duration = 800;
+
+      function animate (currentTime) {
+        if (!start) start = currentTime;
+        const elapsed = currentTime - start;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const x = bezierPoint(progress, startX, controlX1, controlX2, endX);
+        const y = bezierPoint(progress, startY, controlY1, controlY2, endY);
+
+        cursor.style.left = x + 'px';
+        cursor.style.top = y + 'px';
+
+        const event = new MouseEvent('mousemove', {
+          bubbles: true,
+          clientX: x,
+          clientY: y
+        });
+        document.dispatchEvent(event);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isAnimating = false;
+          document.body.style.cursor = 'none';
+          yesBtn.style.cursor = 'pointer';
+          lastX = endX;
+          lastY = endY;
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function createHeart (x, y, angle, distance) {
+      const heart = document.createElement('div');
+      heart.className = 'heart-particle';
+      heart.style.left = x + 'px';
+      heart.style.top = y + 'px';
+
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+
+      heart.style.setProperty('--tx', `${tx}px`);
+      heart.style.setProperty('--ty', `${ty}px`);
+      heart.style.animation = 'heartBurst 1.5s ease-out forwards';
+
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 1500);
+    }
+
+    function createHeartBurst (x, y) {
+      const numHearts = 12;
+      const distance = 150;
+
+      for (let i = 0; i < numHearts; i++) {
+        const angle = (i / numHearts) * Math.PI * 2;
+        createHeart(x, y, angle, distance);
+      }
+    }
+
+    function successAnimation () {
+      content.classList.add('fall-transition');
+
+      setTimeout(() => {
+        successMessage.classList.add('show');
+
+        setTimeout(() => {
+
+          const burstInterval = setInterval(() => {
+            const randomX = Math.random() * window.innerWidth - 100;
+            const randomY = Math.random() * window.innerHeight - 100;
+            createHeartBurst(randomX, randomY);
+          }, 500);
+
+          setTimeout(() => clearInterval(burstInterval), 100000);
+        }, 100);
+      }, 1000);
+    }
+
+    noBtn.addEventListener('mouseenter', (e) => {
+      moveToYesButton(lastX, lastY);
+    });
+
+    noBtn.addEventListener('click', () => {
+      if (!isAnimating) {
+        yesBtn.click();
+      } else {
+        setTimeout(() => {
+          yesBtn.click();
+        }, 800);
+      }
+    });
+
+    document.addEventListener('mouseover', (e) => {
+      if (e.target === noBtn) {
+        const yesBtnRect = yesBtn.getBoundingClientRect();
+        const yesX = yesBtnRect.left + yesBtnRect.width / 2;
+        const yesY = yesBtnRect.top + yesBtnRect.height / 2;
+
+        cursor.style.left = yesX + 'px';
+        cursor.style.top = yesY + 'px';
+      }
+    });
+
+    function createPetal (x, y) {
+      const petal = document.createElement('div');
+      petal.className = 'petal';
+      petal.style.left = x + 'px';
+      petal.style.top = y + 'px';
+      petal.style.transform = `rotate(${Math.random() * 360}deg)`;
+      document.body.appendChild(petal);
+
+      setTimeout(() => {
+        petal.remove();
+      }, 3000);
+    }
+
+    let lastPetalTime = 0;
+    document.addEventListener('mousemove', (e) => {
+      const currentTime = Date.now();
+      if (currentTime - lastPetalTime > 50) {
+        createPetal(e.clientX, e.clientY);
+        lastPetalTime = currentTime;
+      }
+    });
+
+    yesBtn.addEventListener('click', successAnimation);
+  </script>
+</body>
+
+</html>
